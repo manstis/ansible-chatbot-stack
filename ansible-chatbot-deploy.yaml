@@ -55,7 +55,7 @@ spec:
         envFrom:
           - configMapRef:
               name: "ansible-chatbot-server-env-properties"
-        command: ["python", "-m", "llama_stack.distribution.server.server", "--config", "/.llama/distributions/ansible-chatbot/ansible-chatbot-run.yaml"]
+        command: ["/bin/bash", "/.llama/temp/bootstrap.sh"]
         ports:
           - containerPort: 8321
         volumeMounts:
