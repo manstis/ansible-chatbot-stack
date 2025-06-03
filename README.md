@@ -72,7 +72,7 @@ flowchart TB
 
 > The value for env `PYPI_VERSION` specifies the concrete llama-stack release to use, once building the ansible-chatbot distribution (image). 
 
-    export PYPI_VERSION=0.2.7
+    export PYPI_VERSION=0.2.9
     export LLAMA_STACK_LOGGING=server=debug;core=info
     export UV_HTTP_TIMEOUT=120
     llama stack build --config ansible-chatbot-build.yaml --image-type container
@@ -83,14 +83,14 @@ flowchart TB
     
 > Builds the image `ansible-chatbot:aap-$PYPI_VERSION`. 
 
-    export PYPI_VERSION=0.2.7
+    export PYPI_VERSION=0.2.9
     docker build -f Containerfile -t ansible-chatbot:aap-$PYPI_VERSION --build-arg LLAMA_STACK_VERSION=$PYPI_VERSION .
  
 ## Run
 
 > Change the `ANSIBLE_CHATBOT_VERSION` version and inference parameters below accordingly. 
 
-    export ANSIBLE_CHATBOT_VERSION=aap-0.2.7
+    export ANSIBLE_CHATBOT_VERSION=aap-0.2.9
     export ANSIBLE_CHATBOT_VLLM_URL=<YOUR_MODEL_SERVING_URL>
     export ANSIBLE_CHATBOT_VLLM_API_TOKEN=<YOUR_MODEL_SERVING_API_TOKEN>
     export ANSIBLE_CHATBOT_INFERENCE_MODEL=<YOUR_INFERENCE_MODEL>

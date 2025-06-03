@@ -16,7 +16,7 @@ metadata:
   name: ansible-chatbot-server-env-properties
 immutable: false
 data:
-  ANSIBLE_CHATBOT_IMAGE_TAG: "aap-0.2.7"
+  ANSIBLE_CHATBOT_IMAGE_TAG: "aap-0.2.9"
   INFERENCE_MODEL: "granite-3.3-8b-instruct"
   LLAMA_STACK_PORT: '8321'
   # TODO: Use Secrets instead.
@@ -42,7 +42,8 @@ spec:
       - name: quay-pull-secret
       containers:
       - name: ansible-chatbot
-        image: ansible-chatbot:aap-0.2.7
+        # TODO: Just using a temporal container. Change it to the final one, with access controls.
+        image: ansible-chatbot:aap-0.2.9
         imagePullPolicy: IfNotPresent
         env:
           - name: LLAMA_STACK_CONFIG_DIR
