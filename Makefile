@@ -8,6 +8,10 @@ ANSIBLE_CHATBOT_VLLM_API_TOKEN ?= ${ANSIBLE_CHATBOT_VLLM_API_TOKEN}
 ANSIBLE_CHATBOT_INFERENCE_MODEL ?= ${ANSIBLE_CHATBOT_INFERENCE_MODEL}
 LLAMA_STACK_PORT ?= 8321
 
+# Colors for terminal output
+RED := \033[0;31m
+NC := \033[0m # No Color
+
 .PHONY: install-providers build build-custom run clean all deploy-k8s shell
 
 help:
@@ -30,12 +34,7 @@ help:
 	@echo "  ANSIBLE_CHATBOT_INFERENCE_MODEL	- Inference model to use"
 	@echo "  LLAMA_STACK_PORT              	- Port to expose (default: $(LLAMA_STACK_PORT))"
 
-check-prereqs:
-	@echo "Checking prerequisites..."
-	@command -v docker >/dev/null 2>&1 || command -v podman >/dev/null 2>&1 || { echo "Error: docker or podman is required but not installed." >&2; exit 1; }
-	@echo "Prerequisites check passed."
-
-setup: check-prereqs
+setup:
 	@echo "Setting up environment..."
 	python3 -m venv venv
 	. venv/bin/activate && pip install -r requirements.txt
@@ -53,13 +52,13 @@ install-providers:
 
 check-faiss-db:
 	@if [ ! -f aap_faiss_store.db ]; then \
-		echo "Warning: aap_faiss_store.db not found in the repository root."; \
-		echo "Please copy the aap_faiss_store.db file to the repository root before building."; \
+		echo "$(RED)Warning: aap_faiss_store.db not found in the repository root."; \
+		echo "Please copy the aap_faiss_store.db file to the repository root before building.$(NC)"; \
 	else \
 		echo "aap_faiss_store.db found."; \
 	fi
 
-build: check-prereqs check-faiss-db
+build: check-faiss-db
 	@echo "Building base Ansible Chatbot Stack image..."
 	export PYPI_VERSION=$(PYPI_VERSION) && \
 	export LLAMA_STACK_LOGGING=server=debug;core=info && \
@@ -99,6 +98,6 @@ shell:
 	@echo "Getting a shell in the container..."
 	docker run --security-opt label=disable -it --entrypoint /bin/bash ansible-chatbot:$(ANSIBLE_CHATBOT_VERSION)
 
-all: setup install-providers build build-custom
+all: check-faiss-db setup install-providers build build-custom
 	@echo "All build steps completed successfully."
 	@echo "To run the container, use: make run"
