@@ -32,6 +32,7 @@ distribution_spec:
 #    - remote::model-context-protocol
     - remote::lightspeed
 #    - remote::wolfram-alpha
+  container_image: "registry.access.redhat.com/ubi9"
 image_name: ansible-chatbot
 image_type: container
 
