@@ -1,8 +1,9 @@
 # Makefile for Ansible Chatbot Stack
 
 # Default values for environment variables
-PYPI_VERSION ?= $(PYPI_VERSION)
-ANSIBLE_CHATBOT_VERSION ?= aap-$(PYPI_VERSION)
+QUAY_ORG ?= $(QUAY_ORG)
+LLAMA_STACK_PYPI_VERSION ?= $(LLAMA_STACK_PYPI_VERSION)
+ANSIBLE_CHATBOT_STACK_VERSION ?= $(ANSIBLE_CHATBOT_STACK_VERSION)
 ANSIBLE_CHATBOT_VLLM_URL ?= ${ANSIBLE_CHATBOT_VLLM_URL}
 ANSIBLE_CHATBOT_VLLM_API_TOKEN ?= ${ANSIBLE_CHATBOT_VLLM_API_TOKEN}
 ANSIBLE_CHATBOT_INFERENCE_MODEL ?= ${ANSIBLE_CHATBOT_INFERENCE_MODEL}
@@ -12,7 +13,7 @@ LLAMA_STACK_PORT ?= 8321
 RED := \033[0;31m
 NC := \033[0m # No Color
 
-.PHONY: install-providers build build-custom run clean all deploy-k8s shell
+.PHONY: install-providers build build-custom run clean all deploy-k8s shell tag-and-push
 
 help:
 	@echo "Makefile for Ansible Chatbot Stack"
@@ -25,14 +26,16 @@ help:
 	@echo "  clean             - Clean up generated files and Docker images"
 	@echo "  deploy-k8s        - Deploy to Kubernetes cluster"
 	@echo "  shell             - Get a shell in the container"
+	@echo "  tag-and-push      - Tag and push the container image to quay.io"
 	@echo ""
 	@echo "Required Environment variables:"
-	@echo "  PYPI_VERSION                  	- PyPI version of llama-stack (default: $(PYPI_VERSION))"
-	@echo "  ANSIBLE_CHATBOT_VERSION       	- Version tag for the image (default: $(ANSIBLE_CHATBOT_VERSION))"
+	@echo "  LLAMA_STACK_PYPI_VERSION       	- PyPI version of llama-stack (default: $(LLAMA_STACK_PYPI_VERSION))"
+	@echo "  ANSIBLE_CHATBOT_STACK_VERSION       	- Version tag for the image (default: $(ANSIBLE_CHATBOT_STACK_VERSION))"
 	@echo "  ANSIBLE_CHATBOT_VLLM_URL      	- URL for the vLLM inference provider"
 	@echo "  ANSIBLE_CHATBOT_VLLM_API_TOKEN 	- API token for the vLLM inference provider"
 	@echo "  ANSIBLE_CHATBOT_INFERENCE_MODEL	- Inference model to use"
 	@echo "  LLAMA_STACK_PORT              	- Port to expose (default: $(LLAMA_STACK_PORT))"
+	@echo "  QUAY_ORG                		- Quay organization name (default: $(QUAY_ORG))"
 
 setup:
 	@echo "Setting up environment..."
@@ -60,17 +63,16 @@ check-faiss-db:
 
 build: check-faiss-db
 	@echo "Building base Ansible Chatbot Stack image..."
-	export PYPI_VERSION=$(PYPI_VERSION) && \
 	export LLAMA_STACK_LOGGING=server=debug;core=info && \
 	export UV_HTTP_TIMEOUT=120 && \
 	. venv/bin/activate && \
 	llama stack build --config ansible-chatbot-build.yaml --image-type container
-	@echo "Base image ansible-chatbot:$(PYPI_VERSION) built successfully."
+	@echo "Base image $(RED)ansible-chatbot-stack-base$(NC) built successfully."
 
 build-custom: build
 	@echo "Building customized Ansible Chatbot Stack image..."
-	docker build -f Containerfile -t ansible-chatbot:$(ANSIBLE_CHATBOT_VERSION) --build-arg LLAMA_STACK_VERSION=$(PYPI_VERSION) .
-	@echo "Custom image ansible-chatbot:$(ANSIBLE_CHATBOT_VERSION) built successfully."
+	docker build -f Containerfile -t ansible-chatbot-stack:$(ANSIBLE_CHATBOT_STACK_VERSION) --build-arg ANSIBLE_CHATBOT_STACK_VERSION=$(ANSIBLE_CHATBOT_STACK_VERSION) .
+	@echo "Custom image $(RED)ansible-chatbot-stack:$(ANSIBLE_CHATBOT_STACK_VERSION)$(NC) built successfully."
 
 run:
 	@echo "Running Ansible Chatbot Stack container..."
@@ -81,12 +83,15 @@ run:
 	  --env VLLM_URL=$(ANSIBLE_CHATBOT_VLLM_URL) \
 	  --env VLLM_API_TOKEN=$(ANSIBLE_CHATBOT_VLLM_API_TOKEN) \
 	  --env INFERENCE_MODEL=$(ANSIBLE_CHATBOT_INFERENCE_MODEL) \
-	  ansible-chatbot:$(ANSIBLE_CHATBOT_VERSION)
+	  ansible-chatbot-stack:$(ANSIBLE_CHATBOT_STACK_VERSION)
 
 clean:
 	@echo "Cleaning up..."
 	rm -rf providers.d/
-	docker rmi -f $$(docker images -a -q --filter reference=ansible-chatbot) || true
+	@echo "Removing ansible-chatbot-stack images..."
+	docker rmi -f $$(docker images -a -q --filter reference=ansible-chatbot-stack) || true
+	@echo "Removing ansible-chatbot-stack-base image..."
+	docker rmi -f $$(docker images -a -q --filter reference=ansible-chatbot-stack-base) || true
 	@echo "Clean-up complete."
 
 deploy-k8s:
@@ -98,6 +103,17 @@ shell:
 	@echo "Getting a shell in the container..."
 	docker run --security-opt label=disable -it --entrypoint /bin/bash ansible-chatbot:$(ANSIBLE_CHATBOT_VERSION)
 
+tag-and-push:
+	@echo "Logging in to quay.io..."
+	@echo "Please enter your quay.io credentials when prompted"
+	docker login quay.io
+	@echo "Tagging image ansible-chatbot-stack:$(ANSIBLE_CHATBOT_STACK_VERSION)"
+	docker tag ansible-chatbot-stack:$(ANSIBLE_CHATBOT_STACK_VERSION) quay.io/$(QUAY_ORG)/ansible-chatbot-stack:$(ANSIBLE_CHATBOT_STACK_VERSION)
+	@echo "Pushing image to quay.io..."
+	docker push quay.io/$(QUAY_ORG)/ansible-chatbot-stack:$(ANSIBLE_CHATBOT_STACK_VERSION)
+	@echo "Image successfully pushed to quay.io/$(QUAY_ORG)/ansible-chatbot-stack:$(ANSIBLE_CHATBOT_STACK_VERSION)"
+
 all: check-faiss-db setup install-providers build build-custom
 	@echo "All build steps completed successfully."
-	@echo "To run the container, use: make run"
+	@echo "To run the container, use: $(RED)make run$(NC)"
+	@echo "To tag and push the container to quay.io, use: $(RED)make tag-and-push$(NC)"
