@@ -76,7 +76,7 @@ providers:
         type: sqlite
         namespace: null
         db_path: ${env.SQLITE_STORE_DIR:/.llama/data/distributions/ansible-chatbot}/agents_store.db
-      resonses_store:
+      responses_store:
         type: sqlite
         namespace: null
         db_path: ${env.SQLITE_STORE_DIR:/.llama/data/distributions/ansible-chatbot}/responses_store.db
