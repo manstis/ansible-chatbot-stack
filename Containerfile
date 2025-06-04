@@ -1,4 +1,4 @@
-ARG LLAMA_STACK_VERSION=0.2.7
+ARG LLAMA_STACK_VERSION=0.2.9
 FROM ansible-chatbot:${LLAMA_STACK_VERSION}
 
 RUN mkdir -p /.llama/distributions/ansible-chatbot
