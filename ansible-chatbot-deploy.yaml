@@ -56,6 +56,39 @@ spec:
         volumeMounts:
           - name: ansible-chatbot-storage
             mountPath: /.llama/data
+      initContainers:
+      - name: init-rag-vector-db
+        image: quay.io/ansible/aap-rag-content:latest
+        command:
+        - /bin/bash
+        - -c
+        - |
+          echo "Initialize RAG vector database"
+          MOUNTPATH=/.llama/data
+          if [[ ! -d ${MOUNTPATH} ]]; then
+            echo "Volume mount path is not found."
+            exit 1
+          fi
+          DESTDIR=${MOUNTPATH}/distributions/ansible-chatbot
+          mkdir -p ${DESTDIR}
+          cd /rag/llama_stack_vector_db
+          diff faiss_store.db.gz.sha256 ${DESTDIR}/faiss_store.db.gz.sha256
+          if [[ $? != 0 ]]; then
+            gzip -cd faiss_store.db.gz > ${DESTDIR}/aap_faiss_store.db
+            if [[ $? != 0 ]]; then
+              echo "Failed to install new vector database file."
+              exit 1
+            fi
+            cp faiss_store.db.gz.sha256 ${DESTDIR}
+            echo "Latest vector database file has been installed."
+          else
+            echo "Latest vector database file already up-to-date and installed.."
+          fi
+          ls -l ${DESTDIR}/aap_faiss_store.db
+          cat ${DESTDIR}/faiss_store.db.gz.sha256
+        volumeMounts:
+          - name: ansible-chatbot-storage
+            mountPath: /.llama/data
       volumes:
       - name: ansible-chatbot-storage
         persistentVolumeClaim:
