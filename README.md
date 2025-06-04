@@ -73,7 +73,7 @@ flowchart TB
 > The value for env `PYPI_VERSION` specifies the concrete llama-stack release to use, once building the ansible-chatbot distribution (image). 
 
     export PYPI_VERSION=0.2.9
-    export LLAMA_STACK_LOGGING=server=debug;core=info
+    export LLAMA_STACK_LOGGING='server=debug;core=info'
     export UV_HTTP_TIMEOUT=120
     llama stack build --config ansible-chatbot-build.yaml --image-type container
 

@@ -35,5 +35,8 @@ distribution_spec:
   container_image: "registry.access.redhat.com/ubi9"
 image_name: ansible-chatbot
 image_type: container
+additional_pip_packages:
+- aiosqlite
+- sqlalchemy[asyncio]
 
 external_providers_dir: ~/.llama/providers.d
