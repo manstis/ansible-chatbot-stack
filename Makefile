@@ -4,9 +4,9 @@
 QUAY_ORG ?= $(QUAY_ORG)
 LLAMA_STACK_PYPI_VERSION ?= $(LLAMA_STACK_PYPI_VERSION)
 ANSIBLE_CHATBOT_STACK_VERSION ?= $(ANSIBLE_CHATBOT_STACK_VERSION)
-ANSIBLE_CHATBOT_VLLM_URL ?= ${ANSIBLE_CHATBOT_VLLM_URL}
-ANSIBLE_CHATBOT_VLLM_API_TOKEN ?= ${ANSIBLE_CHATBOT_VLLM_API_TOKEN}
-ANSIBLE_CHATBOT_INFERENCE_MODEL ?= ${ANSIBLE_CHATBOT_INFERENCE_MODEL}
+ANSIBLE_CHATBOT_VLLM_URL ?= $(ANSIBLE_CHATBOT_VLLM_URL)
+ANSIBLE_CHATBOT_VLLM_API_TOKEN ?= $(ANSIBLE_CHATBOT_VLLM_API_TOKEN)
+ANSIBLE_CHATBOT_INFERENCE_MODEL ?= $(ANSIBLE_CHATBOT_INFERENCE_MODEL)
 LLAMA_STACK_PORT ?= 8321
 
 # Colors for terminal output
@@ -95,13 +95,15 @@ clean:
 	@echo "Clean-up complete."
 
 deploy-k8s:
-	@echo "Deploying to Kubernetes cluster..."
-	kubectl apply -f ansible-chatbot-deploy.yaml
+	@echo Change configuration in `kustomization.yaml` accordingly, then deploy
+	kubectl kustomize . > local-chatbot-stack-deploy.yaml
+	@echo Deploy the service:
+	kubectl apply -f local-chatbot-stack-deploy.yaml
 	@echo "Deployment initiated. Verify using kubectl commands."
 
 shell:
 	@echo "Getting a shell in the container..."
-	docker run --security-opt label=disable -it --entrypoint /bin/bash ansible-chatbot:$(ANSIBLE_CHATBOT_VERSION)
+	docker run --security-opt label=disable -it --entrypoint /bin/bash ansible-chatbot-stack:$(ANSIBLE_CHATBOT_VERSION)
 
 tag-and-push:
 	@echo "Logging in to quay.io..."
