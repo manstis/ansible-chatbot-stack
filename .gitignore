@@ -172,3 +172,9 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# ignoring output llama-stack DBs when running make run-local-db
+agents_store.db
+localfs_datasetio.db
+responses_store.db
+trace_store.db
