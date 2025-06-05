@@ -33,7 +33,7 @@ distribution_spec:
     - remote::lightspeed
 #    - remote::wolfram-alpha
   container_image: "registry.access.redhat.com/ubi9"
-image_name: ansible-chatbot
+image_name: ansible-chatbot-stack-base
 image_type: container
 additional_pip_packages:
 - aiosqlite
