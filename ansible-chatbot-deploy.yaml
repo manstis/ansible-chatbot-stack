@@ -48,6 +48,8 @@ spec:
         env:
           - name: LLAMA_STACK_CONFIG_DIR
             value: /.llama/data/
+          - name: EMBEDDING_MODEL
+            value: /.llama/data/embeddings_model
         envFrom:
           - configMapRef:
               name: "ansible-chatbot-server-env-properties"
@@ -82,10 +84,25 @@ spec:
             cp faiss_store.db.gz.sha256 ${DESTDIR}
             echo "Latest vector database file has been installed."
           else
-            echo "Latest vector database file already up-to-date and installed.."
+            echo "Latest vector database file already up-to-date and installed."
           fi
           ls -l ${DESTDIR}/aap_faiss_store.db
           cat ${DESTDIR}/faiss_store.db.gz.sha256
+          echo "Initialize embedding model"
+          cd /rag
+          diff embeddings_model/config.json ${MOUNTPATH}/embeddings_model/config.json
+          if [[ $? != 0 ]]; then
+            rm -rf ${MOUNTPATH}/embeddings_model
+            cp -r embeddings_model ${MOUNTPATH}
+            if [[ $? != 0 ]]; then
+              echo "Failed to install embedding model."
+              exit 1
+            fi
+            echo "Latest embeddings model has been installed."
+          else
+            echo "Latest embeddings model already up-to-date and installed."
+          fi
+          cat ${MOUNTPATH}/embeddings_model/config.json
         volumeMounts:
           - name: ansible-chatbot-storage
             mountPath: /.llama/data
