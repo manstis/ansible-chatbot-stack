@@ -20,7 +20,12 @@ data:
   # TODO: Use Secrets instead.
   VLLM_API_TOKEN: ""
   # TODO: Use Secrets instead.
-  VLLM_URL: ''
+  VLLM_URL: ""
+  # TODO: Use Secrets instead.
+  AAP_GATEWAY_TOKEN: ""
+  AAP_GATEWAY_URL: ""
+  AAP_CONTROLLER_SERVICE_URL: ""
+  AAP_LIGHTSPEED_SERVICE_URL: ""
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -38,10 +43,20 @@ spec:
     spec:
       imagePullSecrets:
       - name: quay-pull-secret
+      initContainers:
+        - name: init-rag-vector-db
+          image: quay.io/ansible/aap-rag-content:latest
+          env:
+            - name: LLAMA_STACK_CONFIG_DIR
+              value: /.llama/data
+          volumeMounts:
+            - name: ansible-chatbot-storage
+              mountPath: /.llama/data
+          command:
+            - /rag/entrypoint.sh
       containers:
       - name: ansible-chatbot
-        # TODO: Just using a temporal container. Change it to the final one, with access controls.
-        image: ansible-chatbot:aap-0.2.9
+        image: quay.io/ansible/ansible-chatbot-stack:0.0.2
         imagePullPolicy: IfNotPresent
         env:
           - name: LLAMA_STACK_CONFIG_DIR
@@ -56,17 +71,58 @@ spec:
         volumeMounts:
           - name: ansible-chatbot-storage
             mountPath: /.llama/data
-      initContainers:
-      - name: init-rag-vector-db
-        image: quay.io/ansible/aap-rag-content:latest
+      - name: ansible-mcp-gateway
+        image: quay.io/ansible/ansible-mcp-gateway:0.0.1
+        imagePullPolicy: IfNotPresent
+        ports:
+          - containerPort: 8003
+            protocol: TCP
+        envFrom:
+          - configMapRef:
+              name: "ansible-chatbot-server-env-properties"
         env:
-          - name: LLAMA_STACK_CONFIG_DIR
-            value: /.llama/data
-        volumeMounts:
-          - name: ansible-chatbot-storage
-            mountPath: /.llama/data
-        command:
-          - /rag/entrypoint.sh
+          - name: HOST
+            value: 0.0.0.0
+          - name: PORT
+            value: '8003'
+      - name: ansible-mcp-controller
+        image: quay.io/ansible/ansible-mcp-controller:0.0.1
+        imagePullPolicy: IfNotPresent
+        ports:
+          - containerPort: 8004
+            protocol: TCP
+        envFrom:
+          - configMapRef:
+              name: "ansible-chatbot-server-env-properties"
+        env:
+          - name: HOST
+            value: 0.0.0.0
+          - name: PORT
+            value: '8004'
+          - name: AAP_SERVICE_URL
+            valueFrom:
+              configMapKeyRef:
+                name: "ansible-chatbot-server-env-properties"
+                key: AAP_CONTROLLER_SERVICE_URL
+      - name: ansible-mcp-lightspeed
+        image: quay.io/ansible/ansible-mcp-lightspeed:0.0.1
+        imagePullPolicy: IfNotPresent
+        ports:
+          - containerPort: 8005
+            protocol: TCP
+        envFrom:
+          - configMapRef:
+              name: "ansible-chatbot-server-env-properties"
+        env:
+          - name: HOST
+            value: 0.0.0.0
+          - name: PORT
+            value: '8005'
+          - name: AAP_SERVICE_URL
+            valueFrom:
+              configMapKeyRef:
+                name: "ansible-chatbot-server-env-properties"
+                key: AAP_LIGHTSPEED_SERVICE_URL
       volumes:
       - name: ansible-chatbot-storage
         persistentVolumeClaim:
