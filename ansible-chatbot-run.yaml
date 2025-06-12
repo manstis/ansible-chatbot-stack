@@ -80,6 +80,10 @@ providers:
         type: sqlite
         namespace: null
         db_path: ${env.SQLITE_STORE_DIR:/.llama/data/distributions/ansible-chatbot}/responses_store.db
+      toolgroups:
+        - "mcp::aap-gateway"
+        - "mcp::aap-controller"
+        - "mcp::aap-lightspeed"
   datasetio:
   - provider_id: localfs
     provider_type: inline::localfs
@@ -101,7 +105,8 @@ providers:
     config: {}
   - provider_id: lightspeed
     provider_type: remote::lightspeed
-    config: {}
+    config:
+      api_key: ${env.AAP_GATEWAY_TOKEN}
 metadata_store: null
 models:
 - metadata: {}
@@ -126,8 +131,20 @@ datasets: []
 scoring_fns: []
 benchmarks: []
 tool_groups:
-- toolgroup_id: builtin::rag
-  provider_id: rag-runtime
+  - toolgroup_id: "mcp::aap-gateway"
+    provider_id: lightspeed
+    mcp_endpoint:
+      uri: "http://127.0.0.1:8003/sse"
+  - toolgroup_id: "mcp::aap-controller"
+    provider_id: lightspeed
+    mcp_endpoint:
+      uri: "http://127.0.0.1:8004/sse"
+  - toolgroup_id: "mcp::aap-lightspeed"
+    provider_id: lightspeed
+    mcp_endpoint:
+      uri: "http://127.0.0.1:8005/sse"
+  - toolgroup_id: builtin::rag
+    provider_id: rag-runtime
 logging: null
 server:
   port: 8321
