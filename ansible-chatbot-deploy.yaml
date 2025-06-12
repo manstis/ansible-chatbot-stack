@@ -56,7 +56,7 @@ spec:
             - /rag/entrypoint.sh
       containers:
       - name: ansible-chatbot
-        image: quay.io/ansible/ansible-chatbot-stack:0.0.2
+        image: ansible-chatbot-stack
         imagePullPolicy: IfNotPresent
         env:
           - name: LLAMA_STACK_CONFIG_DIR
@@ -72,7 +72,7 @@ spec:
           - name: ansible-chatbot-storage
             mountPath: /.llama/data
       - name: ansible-mcp-gateway
-        image: quay.io/ansible/ansible-mcp-gateway:0.0.1
+        image: ansible-mcp-gateway
         imagePullPolicy: IfNotPresent
         ports:
           - containerPort: 8003
@@ -86,7 +86,7 @@ spec:
           - name: PORT
             value: '8003'
       - name: ansible-mcp-controller
-        image: quay.io/ansible/ansible-mcp-controller:0.0.1
+        image: ansible-mcp-controller
         imagePullPolicy: IfNotPresent
         ports:
           - containerPort: 8004
@@ -105,7 +105,7 @@ spec:
                 name: "ansible-chatbot-server-env-properties"
                 key: AAP_CONTROLLER_SERVICE_URL
       - name: ansible-mcp-lightspeed
-        image: quay.io/ansible/ansible-mcp-lightspeed:0.0.1
+        image: ansible-mcp-lightspeed
         imagePullPolicy: IfNotPresent
         ports:
           - containerPort: 8005
