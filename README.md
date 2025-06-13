@@ -45,6 +45,7 @@ flowchart TB
 - Install llama-stack on the host machine, if not present.
 - External providers YAML manifests must be present in `providers.d/` of your host's llama-stack directory.
 - External providers' python libraries must be in the container's python's library path, but also in the host machine's python library path. It is a workaround for [this hack](https://github.com/meta-llama/llama-stack/blob/0cc07311890c00feb5bbd40f5052c8a84a88aa65/llama_stack/cli/stack/_build.py#L299).
+- Vector DB and embedding image files are copied from the latest `aap-rag-content` image to `./vector_db` and `./embeddings_model` respectively.
 
 ```shell
         make setup
@@ -80,6 +81,7 @@ flowchart TB
     export ANSIBLE_CHATBOT_VLLM_URL=<YOUR_MODEL_SERVING_URL>
     export ANSIBLE_CHATBOT_VLLM_API_TOKEN=<YOUR_MODEL_SERVING_API_TOKEN>
     export ANSIBLE_CHATBOT_INFERENCE_MODEL=<YOUR_INFERENCE_MODEL>
+    export AAP_GATEWAY_TOKEN=<YOUR_AAP_GATEWAY_TOKEN>
     make run
 ```
 
