@@ -6,6 +6,7 @@ ANSIBLE_CHATBOT_VERSION ?=
 ANSIBLE_CHATBOT_VLLM_URL ?=
 ANSIBLE_CHATBOT_VLLM_API_TOKEN ?=
 ANSIBLE_CHATBOT_INFERENCE_MODEL ?=
+ANSIBLE_CHATBOT_INFERENCE_MODEL_FILTER ?=
 AAP_GATEWAY_TOKEN ?=
 LLAMA_STACK_PORT ?= 8321
 LOCAL_DB_PATH ?= .
@@ -45,6 +46,7 @@ help:
 	@echo "  ANSIBLE_CHATBOT_VLLM_URL      	- URL for the vLLM inference provider"
 	@echo "  ANSIBLE_CHATBOT_VLLM_API_TOKEN 	- API token for the vLLM inference provider"
 	@echo "  ANSIBLE_CHATBOT_INFERENCE_MODEL	- Inference model to use"
+	@echo "  ANSIBLE_CHATBOT_INFERENCE_MODEL_FILTER	- Inference model to use for tools filtering"
 	@echo "  AAP_GATEWAY_TOKEN                  - API toke for the AAP Gateway"
 	@echo "  CONTAINER_DB_PATH           		- Path to the container database (default: $(CONTAINER_DB_PATH))"
 	@echo "  LOCAL_DB_PATH               		- Path to the local database (default: $(LOCAL_DB_PATH))"
@@ -55,8 +57,10 @@ setup: setup-vector-db
 	@echo "Setting up environment..."
 	python3 -m venv venv
 	. venv/bin/activate && pip install -r requirements.txt
+	mkdir -p ~/.llama/providers.d/inline/agents/
 	mkdir -p ~/.llama/providers.d/inline/safety/
 	mkdir -p ~/.llama/providers.d/remote/tool_runtime/
+	curl -o ~/.llama/providers.d/inline/agents/lightspeed_inline_agent.yaml https://raw.githubusercontent.com/lightspeed-core/lightspeed-providers/refs/heads/main/resources/external_providers/inline/agents/lightspeed_inline_agent.yaml
 	curl -o ~/.llama/providers.d/inline/safety/lightspeed_question_validity.yaml https://raw.githubusercontent.com/lightspeed-core/lightspeed-providers/refs/heads/main/resources/external_providers/inline/safety/lightspeed_question_validity.yaml
 	curl -o ~/.llama/providers.d/remote/tool_runtime/lightspeed.yaml https://raw.githubusercontent.com/lightspeed-core/lightspeed-providers/refs/heads/main/resources/external_providers/remote/tool_runtime/lightspeed.yaml
 	@echo "Environment setup complete."
@@ -123,6 +127,7 @@ run: check-env-run
 	  --env VLLM_URL=$(ANSIBLE_CHATBOT_VLLM_URL) \
 	  --env VLLM_API_TOKEN=$(ANSIBLE_CHATBOT_VLLM_API_TOKEN) \
 	  --env INFERENCE_MODEL=$(ANSIBLE_CHATBOT_INFERENCE_MODEL) \
+	  --env INFERENCE_MODEL_FILTER=$(ANSIBLE_CHATBOT_INFERENCE_MODEL_FILTER) \
 	  --env AAP_GATEWAY_TOKEN=$(AAP_GATEWAY_TOKEN) \
 	  ansible-chatbot-stack:$(ANSIBLE_CHATBOT_VERSION)
 
@@ -141,6 +146,7 @@ run-local-db: check-env-run-local-db
 	@echo "Running Ansible Chatbot Stack container..."
 	@echo "Using vLLM URL: $(ANSIBLE_CHATBOT_VLLM_URL)"
 	@echo "Using inference model: $(ANSIBLE_CHATBOT_INFERENCE_MODEL)"
+	@echo "Using inference model for tools filtering : $(ANSIBLE_CHATBOT_INFERENCE_MODEL_FILTER)"
 	@echo "Mapping local DB from $(LOCAL_DB_PATH) to $(CONTAINER_DB_PATH)"
 	docker run --security-opt label=disable -it -p $(LLAMA_STACK_PORT):$(LLAMA_STACK_PORT) \
 	  -v $(LOCAL_DB_PATH):$(CONTAINER_DB_PATH) \
@@ -150,6 +156,7 @@ run-local-db: check-env-run-local-db
 	  --env VLLM_URL=$(ANSIBLE_CHATBOT_VLLM_URL) \
 	  --env VLLM_API_TOKEN=$(ANSIBLE_CHATBOT_VLLM_API_TOKEN) \
 	  --env INFERENCE_MODEL=$(ANSIBLE_CHATBOT_INFERENCE_MODEL) \
+	  --env INFERENCE_MODEL_FILTER=$(ANSIBLE_CHATBOT_INFERENCE_MODEL_FILTER) \
 	  --env AAP_GATEWAY_TOKEN=$(AAP_GATEWAY_TOKEN) \
 	  ansible-chatbot-stack:$(ANSIBLE_CHATBOT_VERSION)
 
