@@ -70,7 +70,8 @@ providers:
     config: {}
   - provider_id: lightspeed
     provider_type: remote::lightspeed
-    config: {}
+    config:
+      api_key: ${env.AAP_GATEWAY_TOKEN:}
 metadata_store: null
 models:
 - metadata: {}
