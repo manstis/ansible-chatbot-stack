@@ -6,7 +6,7 @@ namespace: ansible-chatbot-stack
 images:
 - name: ansible-chatbot-stack
   newName: quay.io/ansible/ansible-chatbot-stack
-  newTag: 0.0.6
+  newTag: latest
 - name: ansible-mcp-gateway
   newName: quay.io/ansible/ansible-mcp-gateway
   newTag: 0.0.2
