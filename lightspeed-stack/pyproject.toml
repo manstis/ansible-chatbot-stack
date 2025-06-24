@@ -1,0 +1,17 @@
+[project]
+name = "ansible-chatbot-stack"
+version = "0.1.0"
+description = "Ansible Lightspeed Intelligent Assistant (LSIA)"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "aiosqlite~=0.21.0",
+    "faiss-cpu~=1.11.0",
+    "fire~=0.7.0",
+    "lightspeed-stack-providers~=0.1.9",
+    "mcp~=1.9.4",
+    "numpy==2.2.6",
+    "opentelemetry-api~=1.34.1",
+    "opentelemetry-exporter-otlp~=1.34.1",
+    "sqlalchemy~=2.0.41",
+]

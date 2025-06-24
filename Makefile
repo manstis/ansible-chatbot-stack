@@ -34,8 +34,11 @@ help:
 	@echo "  setup-vector-db   - Sets up vector DB and embedding model"
 	@echo "  build             - Build the base Ansible Chatbot Stack image"
 	@echo "  build-custom      - Build the customized Ansible Chatbot Stack image"
+	@echo "  build-lsc         - Build the customized Ansible Chatbot Stack image from lightspeed-core/lightspeed-stack"
 	@echo "  run               - Run the Ansible Chatbot Stack container"
 	@echo "  run-local-db      - Run the Ansible Chatbot Stack container with local DB mapped to conatiner DB"
+	@echo "  run-lsc           - Run the Ansible Chatbot Stack container built with 'build-lsc'"
+	@echo "  run-test-lsc      - Run some sanity checks for the  Ansible Chatbot Stack container built with 'build-lsc'"
 	@echo "  clean             - Clean up generated files and Docker images"
 	@echo "  deploy-k8s        - Deploy to Kubernetes cluster"
 	@echo "  shell             - Get a shell in the container"
@@ -57,10 +60,10 @@ setup: setup-vector-db
 	@echo "Setting up environment..."
 	python3 -m venv venv
 	. venv/bin/activate && pip install -r requirements.txt
-	mkdir -p ~/.llama/providers.d/inline/agents/
-	mkdir -p ~/.llama/providers.d/remote/tool_runtime/
-	curl -o ~/.llama/providers.d/inline/agents/lightspeed_inline_agent.yaml https://raw.githubusercontent.com/lightspeed-core/lightspeed-providers/refs/heads/main/resources/external_providers/inline/agents/lightspeed_inline_agent.yaml
-	curl -o ~/.llama/providers.d/remote/tool_runtime/lightspeed.yaml https://raw.githubusercontent.com/lightspeed-core/lightspeed-providers/refs/heads/main/resources/external_providers/remote/tool_runtime/lightspeed.yaml
+	mkdir -p llama-stack/providers.d/inline/agents/
+	mkdir -p llama-stack/providers.d/remote/tool_runtime/
+	curl -o llama-stack/providers.d/inline/agents/lightspeed_inline_agent.yaml https://raw.githubusercontent.com/lightspeed-core/lightspeed-providers/refs/heads/main/resources/external_providers/inline/agents/lightspeed_inline_agent.yaml
+	curl -o llama-stack/providers.d/remote/tool_runtime/lightspeed.yaml https://raw.githubusercontent.com/lightspeed-core/lightspeed-providers/refs/heads/main/resources/external_providers/remote/tool_runtime/lightspeed.yaml
 	@echo "Environment setup complete."
 
 setup-vector-db:
@@ -89,6 +92,18 @@ check-env-build-custom:
 build-custom: check-env-build-custom build
 	@echo "Building customized Ansible Chatbot Stack image..."
 	docker build -f Containerfile -t ansible-chatbot-stack:$(ANSIBLE_CHATBOT_VERSION) --build-arg LLAMA_STACK_VERSION=$(LLAMA_STACK_VERSION) .
+	@printf "Custom image $(RED)ansible-chatbot-stack:$(ANSIBLE_CHATBOT_VERSION)$(NC) built successfully.\n"
+
+# Pre-check required environment variables for build-lsc
+check-env-build-lsc:
+	@if [ -z "$(ANSIBLE_CHATBOT_VERSION)" ]; then \
+		printf "$(RED)Error: ANSIBLE_CHATBOT_VERSION is required but not set$(NC)\n"; \
+		exit 1; \
+	fi
+
+build-lsc: check-env-build-lsc
+	@echo "Building customized Ansible Chatbot Stack image from lightspeed-core/lightspeed-stack..."
+	docker build -f ./lightspeed-stack/Containerfile.lsc -t ansible-chatbot-stack:$(ANSIBLE_CHATBOT_VERSION) .
 	@printf "Custom image $(RED)ansible-chatbot-stack:$(ANSIBLE_CHATBOT_VERSION)$(NC) built successfully.\n"
 
 # Pre-check for required environment variables
@@ -128,6 +143,28 @@ run: check-env-run
 	  --env INFERENCE_MODEL_FILTER=$(ANSIBLE_CHATBOT_INFERENCE_MODEL_FILTER) \
 	  --env AAP_GATEWAY_TOKEN=$(AAP_GATEWAY_TOKEN) \
 	  ansible-chatbot-stack:$(ANSIBLE_CHATBOT_VERSION)
+
+run-lsc: check-env-run
+	@echo "Running Ansible Chatbot Stack container..."
+	@echo "Using vLLM URL: $(ANSIBLE_CHATBOT_VLLM_URL)"
+	@echo "Using inference model: $(ANSIBLE_CHATBOT_INFERENCE_MODEL)"
+	docker run --security-opt label=disable -it -p $(LLAMA_STACK_PORT):8080 \
+	  -v ./embeddings_model:/.llama/data/embeddings_model \
+	  -v ./vector_db/aap_faiss_store.db:$(CONTAINER_DB_PATH)/aap_faiss_store.db \
+	  --env VLLM_URL=$(ANSIBLE_CHATBOT_VLLM_URL) \
+	  --env VLLM_API_TOKEN=$(ANSIBLE_CHATBOT_VLLM_API_TOKEN) \
+	  --env INFERENCE_MODEL=$(ANSIBLE_CHATBOT_INFERENCE_MODEL) \
+	  --env INFERENCE_MODEL_FILTER=$(ANSIBLE_CHATBOT_INFERENCE_MODEL_FILTER) \
+	  --env AAP_GATEWAY_TOKEN=$(AAP_GATEWAY_TOKEN) \
+	  ansible-chatbot-stack:$(ANSIBLE_CHATBOT_VERSION)
+
+run-test-lsc:
+	@echo "Running test query against lightspeed-core/lightspeed-stack's /config endpoint..."
+	curl -X GET http://localhost:$(LLAMA_STACK_PORT)/v1/config | jq .
+	@echo "Running test query against lightspeed-core/lightspeed-stack's /models endpoint..."
+	curl -X GET http://localhost:$(LLAMA_STACK_PORT)/v1/models | jq .
+	@echo "Running test query against lightspeed-core/lightspeed-stack's /query endpoint..."
+	curl -X POST http://localhost:$(LLAMA_STACK_PORT)/v1/query -H "Content-Type: application/json" --data '{"query": "What is Ansible EDA?"}' | jq .
 
 # Pre-check required environment variables for local DB run
 check-env-run-local-db: check-env-run
