@@ -151,6 +151,7 @@ run-lsc: check-env-run
 	docker run --security-opt label=disable -it -p $(LLAMA_STACK_PORT):8080 \
 	  -v ./embeddings_model:/.llama/data/embeddings_model \
 	  -v ./vector_db/aap_faiss_store.db:$(CONTAINER_DB_PATH)/aap_faiss_store.db \
+	  -v ./lightspeed-stack/lightspeed-stack.yaml:/.llama/data/lightspeed-stack.yaml \
 	  --env VLLM_URL=$(ANSIBLE_CHATBOT_VLLM_URL) \
 	  --env VLLM_API_TOKEN=$(ANSIBLE_CHATBOT_VLLM_API_TOKEN) \
 	  --env INFERENCE_MODEL=$(ANSIBLE_CHATBOT_INFERENCE_MODEL) \

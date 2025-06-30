@@ -61,9 +61,6 @@ ADD ansible-chatbot-run.yaml /.llama/distributions/ansible-chatbot
 ADD llama-stack/providers.d /.llama/providers.d
 RUN chmod -R g+rw /.llama
 
-# lightspeed-core
-ADD lightspeed-stack/lightspeed-stack.yaml /app-root/lightspeed-stack.yaml
-
 # Bootstrap
 ADD lightspeed-stack/entrypoint.sh /.llama
 RUN chmod +x /.llama/entrypoint.sh
