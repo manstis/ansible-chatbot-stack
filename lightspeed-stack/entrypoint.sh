@@ -23,4 +23,4 @@ else
   fi
 fi
 
-python3.11 src/lightspeed_stack.py --config /.llama/data/lightspeed-stack.yaml
+python3.12 src/lightspeed_stack.py --config /.llama/data/lightspeed-stack.yaml

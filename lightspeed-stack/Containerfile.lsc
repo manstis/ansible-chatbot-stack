@@ -23,7 +23,7 @@ RUN pip3.12 install uv
 # (avoid accidental inclusion of local directories or env files or credentials)
 COPY lightspeed-stack/pyproject.toml lightspeed-stack/uv.lock LICENSE.md README.md ./
 
-RUN uv sync --no-install-project --no-dev
+RUN uv sync --locked --no-install-project --no-dev
 # ======================================================
 
 # ======================================================
