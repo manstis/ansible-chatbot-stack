@@ -36,7 +36,7 @@ USER 0
 # Re-declaring arguments without a value, inherits the global default one.
 ARG ANSIBLE_CHATBOT_VERSION
 ARG APP_ROOT=/app-root
-RUN microdnf install -y --nodocs --setopt=keepcache=0 --setopt=tsflags=nodocs python3.11
+RUN microdnf install -y --nodocs --setopt=keepcache=0 --setopt=tsflags=nodocs python3.11 jq
 WORKDIR /app-root
 
 # PYTHONDONTWRITEBYTECODE 1 : disable the generation of .pyc
