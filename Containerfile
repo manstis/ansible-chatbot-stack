@@ -34,10 +34,9 @@ FROM quay.io/lightspeed-core/lightspeed-stack:dev-latest
 USER 0
 
 # Re-declaring arguments without a value, inherits the global default one.
+ARG APP_ROOT
 ARG ANSIBLE_CHATBOT_VERSION
-ARG APP_ROOT=/app-root
 RUN microdnf install -y --nodocs --setopt=keepcache=0 --setopt=tsflags=nodocs python3.11 jq
-WORKDIR /app-root
 
 # PYTHONDONTWRITEBYTECODE 1 : disable the generation of .pyc
 # PYTHONUNBUFFERED 1 : force the stdout and stderr streams to be unbuffered
@@ -49,7 +48,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONIOENCODING=UTF-8 \
     LANG=en_US.UTF-8
 
-COPY --from=builder --chown=1001:1001 /app-root /app-root
+COPY --from=builder /app-root /app-root
 
 # this directory is checked by ecosystem-cert-preflight-checks task in Konflux
 COPY --from=builder /app-root/LICENSE.md /licenses/
@@ -62,6 +61,7 @@ ENV LLAMA_STACK_CONFIG_DIR=/.llama/data
 # Data and configuration
 RUN mkdir -p /.llama/distributions/ansible-chatbot
 RUN mkdir -p /.llama/data/distributions/ansible-chatbot
+ADD lightspeed-stack.yaml /.llama/distributions/ansible-chatbot
 ADD ansible-chatbot-run.yaml /.llama/distributions/ansible-chatbot
 RUN echo -e "\
 {\n\
