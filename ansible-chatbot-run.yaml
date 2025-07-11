@@ -79,14 +79,14 @@ models:
   provider_model_id: null
 - metadata:
     embedding_dimension: 768
-  model_id: ./embeddings_model
+  model_id: /.llama/data/distributions/ansible-chatbot/embeddings_model
   provider_id: inline_sentence-transformer
   model_type: embedding
 shields: []
 vector_dbs:
 - metadata: {}
   vector_db_id: "aap-product-docs-2_5"
-  embedding_model: ./embeddings_model
+  embedding_model: /.llama/data/distributions/ansible-chatbot/embeddings_model
   embedding_dimension: 768
   provider_id: "aap_faiss"
 datasets: []
