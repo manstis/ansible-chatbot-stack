@@ -11,7 +11,7 @@ apis:
 - tool_runtime
 providers:
   inference:
-  - provider_id: rhosai_vllm_dev
+  - provider_id: my_rhoai_dev
     provider_type: remote::vllm
     config:
       url: ${env.VLLM_URL}
@@ -75,7 +75,7 @@ metadata_store: null
 models:
 - metadata: {}
   model_id: ${env.INFERENCE_MODEL}
-  provider_id: rhosai_vllm_dev
+  provider_id: my_rhoai_dev
   provider_model_id: null
 - metadata:
     embedding_dimension: 768
