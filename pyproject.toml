@@ -16,3 +16,9 @@ dependencies = [
     "sentence-transformers>=5.0.0",
     "sqlalchemy~=2.0.41",
 ]
+
+[dependency-groups]
+dev = [
+    "cachetools>=6.1.0",
+    "kubernetes>=33.1.0",
+]
