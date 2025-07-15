@@ -181,3 +181,4 @@ trace_store.db
 /embeddings_model
 /vector_db
 /llama-stack
+/work
