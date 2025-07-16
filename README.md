@@ -151,8 +151,6 @@ Runs basic tests against the local container.
     kubectl apply -f my-chatbot-stack-deploy.yaml
 ```
 
-### [Verify the deployment](https://llama-stack.readthedocs.io/en/latest/distributions/kubernetes_deployment.html#verifying-the-deployment)
-
 ## Appendix - Host clean-up
 
 If you have the need for re-building images, apply the following clean-ups right before:
