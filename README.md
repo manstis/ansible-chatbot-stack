@@ -194,3 +194,13 @@ If you have the need for re-building images, apply the following clean-ups right
     - working directory: `(ansible-chatbot-stack project root)`
     - path to ".env" files: `(ansible-chatbot-stack project root)/.env`
 4. Run the created configuration from PyCharm main menu.
+
+#### Note: 
+If you want to debug codes in the `lightspeed-providers` project, you 
+can add it as a local package dependency with:
+```commandline
+uv add --editable (lightspeed-providers project root)
+```
+It will update `pyproject.toml` and `uv.lock` files.  Remember that 
+they are for debugging purpose only and avoid checking in those local 
+changes.
