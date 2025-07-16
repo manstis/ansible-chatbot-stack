@@ -185,7 +185,7 @@ If you have the need for re-building images, apply the following clean-ups right
     EMBEDDINGS_MODEL=./embeddings_model
     VECTOR_DB_DIR=./vector_db
     PROVIDERS_DB_DIR=./work
-    EXTERNAL_PROVIDERS_DIR=llama-stack
+    EXTERNAL_PROVIDERS_DIR=./llama-stack/providers.d
     ```
 3. Create a Python run configuration with following values:
     - script/module: `script`
