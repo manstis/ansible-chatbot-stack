@@ -156,6 +156,7 @@ clean:
 	@echo "Cleaning up your local folders..."
 	rm -rf llama-stack/
 	rm -rf providers.d/
+	rm -rf work/
 	@echo "Removing ansible-chatbot-stack images..."
 	docker rmi -f $$(docker images -a -q --filter reference=ansible-chatbot-stack) || true
 	@echo "Removing ansible-chatbot-stack containers..."
