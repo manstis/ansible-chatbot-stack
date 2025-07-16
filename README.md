@@ -165,3 +165,42 @@ If you have the need for re-building images, apply the following clean-ups right
     # Obtain a container shell for the Ansible Chatbot Stack.
     make shell
 ```
+
+## Appendix - Run from source (PyCharm)
+1. Clone the [lightspeed-core/lightspeed-stack](https://github.com/lightspeed-core/lightspeed-stack) repository to your development environment.
+2. In the ansible-chatbot-stack project root, create `.env` file in the project root and define following variables:
+    ```commandline
+    PYTHONDONTWRITEBYTECODE=1
+    PYTHONUNBUFFERED=1
+    PYTHONCOERCECLOCALE=0
+    PYTHONUTF8=1
+    PYTHONIOENCODING=UTF-8
+    LANG=en_US.UTF-8
+    VLLM_URL=(VLLM URL Here)
+    VLLM_API_TOKEN=(VLLM API Token Here)
+    INFERENCE_MODEL=granite-3.3-8b-instruct
+
+    LIBRARY_CLIENT_CONFIG_PATH=./ansible-chatbot-run.yaml
+    SYSTEM_PROMPT_PATH=./ansible-chatbot-system-prompt.txt
+    EMBEDDINGS_MODEL=./embeddings_model
+    VECTOR_DB_DIR=./vector_db
+    PROVIDERS_DB_DIR=./work
+    EXTERNAL_PROVIDERS_DIR=./llama-stack/providers.d
+    ```
+3. Create a Python run configuration with following values:
+    - script/module: `script`
+    - script path: `(lightspeed-stack project root)/src/lightspeed_stack.py`
+    - arguments: `--config ./lightspeed-stack_local.yaml`
+    - working directory: `(ansible-chatbot-stack project root)`
+    - path to ".env" files: `(ansible-chatbot-stack project root)/.env`
+4. Run the created configuration from PyCharm main menu.
+
+#### Note: 
+If you want to debug codes in the `lightspeed-providers` project, you 
+can add it as a local package dependency with:
+```commandline
+uv add --editable (lightspeed-providers project root)
+```
+It will update `pyproject.toml` and `uv.lock` files.  Remember that 
+they are for debugging purpose only and avoid checking in those local 
+changes.
