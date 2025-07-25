@@ -71,7 +71,10 @@ providers:
   - provider_id: model-context-protocol
     provider_type: remote::model-context-protocol
     config: {}
-metadata_store: null
+metadata_store:
+  namespace: null
+  type: sqlite
+  db_path: ${env.PROVIDERS_DB_DIR:/.llama/data/distributions/ansible-chatbot}/registry.db
 models:
 - metadata: {}
   model_id: ${env.INFERENCE_MODEL}
